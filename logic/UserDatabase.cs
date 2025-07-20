@@ -27,6 +27,11 @@ class UserDatabase
                 musicAddedToDatabase[i, 1] = songTag;
                 SaveInSQLite(folder, musicFolder[i], songTag, connection);
             }
+            else
+            {
+                //VerifySQLiteEntry(musicFolder[i], folder, songTag);
+                //TODO verify each song in the db eg: folderlocation has changed or name has changed 
+            }
         }
 
         return musicAddedToDatabase;

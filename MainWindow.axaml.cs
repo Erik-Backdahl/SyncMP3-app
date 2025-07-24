@@ -12,11 +12,11 @@ namespace AvaloniaTest
         {
             InitializeComponent();
         }
-        
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine(StartUpAction.TrySendPing());
+            
         }
         private void OnButtonClick(object sender, RoutedEventArgs e)
         {

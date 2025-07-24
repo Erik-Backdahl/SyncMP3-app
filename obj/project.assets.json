@@ -2805,11 +2805,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Erik\\VSC\\SMALLPROJECTS\\AvaloniaTest\\AvaloniaTest.csproj",
+      "projectUniqueName": "C:\\Users\\Erik\\VSC\\SMALLPROJECTS\\SyncMP3App\\AvaloniaTest.csproj",
       "projectName": "AvaloniaTest",
-      "projectPath": "C:\\Users\\Erik\\VSC\\SMALLPROJECTS\\AvaloniaTest\\AvaloniaTest.csproj",
+      "projectPath": "C:\\Users\\Erik\\VSC\\SMALLPROJECTS\\SyncMP3App\\AvaloniaTest.csproj",
       "packagesPath": "C:\\Users\\Erik\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Erik\\VSC\\SMALLPROJECTS\\AvaloniaTest\\obj\\",
+      "outputPath": "C:\\Users\\Erik\\VSC\\SMALLPROJECTS\\SyncMP3App\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

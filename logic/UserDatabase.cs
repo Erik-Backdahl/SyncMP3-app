@@ -1,8 +1,36 @@
 using System;
 using System.IO;
 using System.Data.SQLite;
+using System.Collections.Generic;
+using System.Text.Json;
 class UserDatabase
 {  
+    public static string ConvertDatabaseToJSON()
+    {
+        var connection = UserDatabase.OpenSQLiteConnection();
+
+        string tableName = "allMusic";
+
+        var data = new List<Dictionary<string, object>>();
+
+        string query = $"SELECT name, songID FROM {tableName} WHERE uploadfile = @uploadfile";
+        using var command = new SQLiteCommand(query, connection);
+        command.Parameters.AddWithValue("@uploadfile", true);
+        using var reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            var row = new Dictionary<string, object>();
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                row[reader.GetName(i)] = reader.GetValue(i);
+            }
+            data.Add(row);
+        }
+
+        string json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+        return json;
+    }
     public static string[,] AddAllMusicNotInDatabase(string folder)
     {
         using var connection = OpenSQLiteConnection();

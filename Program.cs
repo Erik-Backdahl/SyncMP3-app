@@ -1,7 +1,8 @@
 ﻿using Avalonia;
+using AvaloniaTest;
 using System;
 
-namespace AvaloniaTest;
+namespace SyncMP3App;
 
 class Program
 {
@@ -11,15 +12,17 @@ class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        StartUpAction.AllStartUp();
+        EndPoints.SendSQLToServer();
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
-            .UsePlatformDetect()
-            .WithInterFont()
-            .LogToTrace();
+    {
+        return AppBuilder.Configure<App>()
+                .UsePlatformDetect()
+                .WithInterFont()
+                .LogToTrace();
+    }
 }

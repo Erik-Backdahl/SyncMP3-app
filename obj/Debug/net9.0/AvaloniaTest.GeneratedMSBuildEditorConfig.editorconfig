@@ -15,17 +15,17 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = AvaloniaTest
-build_property.ProjectDir = C:\Users\Erik\VSC\SMALLPROJECTS\AvaloniaTest\
+build_property.ProjectDir = C:\Users\Erik\VSC\SMALLPROJECTS\SyncMP3App\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/Erik/VSC/SMALLPROJECTS/AvaloniaTest/App.axaml]
+[C:/Users/Erik/VSC/SMALLPROJECTS/SyncMP3App/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/Erik/VSC/SMALLPROJECTS/AvaloniaTest/MainWindow.axaml]
+[C:/Users/Erik/VSC/SMALLPROJECTS/SyncMP3App/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/Erik/VSC/SMALLPROJECTS/AvaloniaTest/styles/AppDefaultStyles.axaml]
+[C:/Users/Erik/VSC/SMALLPROJECTS/SyncMP3App/styles/AppDefaultStyles.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

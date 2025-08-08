@@ -1,5 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:AvaloniaTest.Converters"
              x:Class="AvaloniaTest.App"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
@@ -11,6 +12,7 @@
 
 
     <Application.Resources>
+        <converters:AlternatingRowColorConverter x:Key="AlternatingRowColorConverter"/>
         <SolidColorBrush x:Key="PrimaryBackground">#0e1020</SolidColorBrush>
             <LinearGradientBrush x:Key="PrimaryBackgroundGradient" StartPoint="0%, 0%" EndPoint="100%, 0%">
                 <GradientStop Offset="0" Color="#050518ff"></GradientStop>

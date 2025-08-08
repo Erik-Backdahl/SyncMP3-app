@@ -192,7 +192,7 @@ class UserDatabase
     }
     public static SQLiteConnection OpenSQLiteConnection()
     {
-        string path = @"Data Source=C:\Users\Erik\VSC\SMALLPROJECTS\AvaloniaTest\SQLiteDatabase\DeviceMusicData.db";
+        string path = @"Data Source=C:\Users\Erik\VSC\SMALLPROJECTS\SyncMP3App\Data\DeviceMusicData.db";
         var connection = new SQLiteConnection(path);
         connection.Open();
         return connection;

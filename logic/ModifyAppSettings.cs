@@ -4,9 +4,9 @@ using System.Configuration;
 using System.IO;
 using System.Text.Json;
 
-class AppSettings
+class ModifyAppSettings
 {
-    private static string jsonFilePath = @"C:\Users\Erik\VSC\SMALLPROJECTS\AvaloniaTest\SQLiteDatabase\AppSettings.json";
+    private static string jsonFilePath = @"C:\Users\Erik\VSC\SMALLPROJECTS\SyncMP3App\Data\AppSettings.json";
     public static string ReadDownloadFolder()
     {
         string jsonData = File.ReadAllText(jsonFilePath);
@@ -72,12 +72,35 @@ class AppSettings
         else
             throw new AppSettingsFileNotFoundException();
     }
+
+    internal static void RegisterGUID(string GUID)
+    {
+        string jsonData = File.ReadAllText(jsonFilePath);
+
+        JsonFormat? root = JsonSerializer.Deserialize<JsonFormat>(jsonData);
+
+        if (root != null)
+        {
+            if (string.IsNullOrEmpty(root.GUID))
+            {
+                root.GUID = GUID;
+                string updatedJson = JsonSerializer.Serialize(root);
+                File.WriteAllText(jsonFilePath, updatedJson);
+            }
+            else
+            {
+                throw new Exception("a GUID is already registered");
+            }
+        }
+        else
+            throw new AppSettingsFileNotFoundException();
+    }
 }
 
 
 class JsonFormat //TODO: figure out wtf is happening here
 {
-    public string GUID { get; set; }
+    public required string GUID { get; set; }
     public string? UUID { get; set; }
     public string? DownloadFolder { get; set; }
     public string[]? RegisterdFolders { get; set; }

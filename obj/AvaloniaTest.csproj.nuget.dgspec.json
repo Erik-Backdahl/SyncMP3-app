@@ -75,6 +75,14 @@
               "target": "Package",
               "version": "[11.3.0, )"
             },
+            "NAudio": {
+              "target": "Package",
+              "version": "[2.2.1, )"
+            },
+            "ReactiveUI": {
+              "target": "Package",
+              "version": "[20.4.1, )"
+            },
             "System.Data.SQLite": {
               "target": "Package",
               "version": "[1.0.119, )"

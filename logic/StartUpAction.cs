@@ -11,10 +11,10 @@ class StartUpAction
     private static string TrySendPing()
     {
         var client = new HttpClient();
-        var request = SendHTTP.HTTPRequestFormat("GET", "/ping");
+        var request = ParseHTTP.HTTPRequestFormat("GET", "/ping");
         try
         {
-            request.Headers.Add("UUID", AppSettings.GetUUID());
+            request.Headers.Add("UUID", ModifyAppSettings.GetUUID());
            
         }
         catch (Exception ex)

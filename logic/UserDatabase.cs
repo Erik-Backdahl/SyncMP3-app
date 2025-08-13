@@ -46,7 +46,6 @@ class UserDatabase
             if (songTag.StartsWith("Failed to find ID"))
             {//does not have ID give it one
                 songTag = TagFile(folder, musicFolder[i]);
-
             }
 
             if (!FoundSongInDataBase(songTag, connection))
@@ -64,12 +63,12 @@ class UserDatabase
 
         return musicAddedToDatabase;
     }
-    private static bool FoundSongInDataBase(string songGUID, SQLiteConnection connection)
+    private static bool FoundSongInDataBase(string songID, SQLiteConnection connection)
     {//TODO check if there is a song that has duplicate name in db
-        string syntax = $"SELECT songGUID FROM allMusic WHERE songGUID=@songGUID";
+        string syntax = $"SELECT songID FROM allMusic WHERE songID=@songID";
 
         var cmd = new SQLiteCommand(syntax, connection);
-        cmd.Parameters.AddWithValue("@songGUID", $"{songGUID}");
+        cmd.Parameters.AddWithValue("@songID", $"{songID}");
 
         try
         {
@@ -81,15 +80,15 @@ class UserDatabase
         }
         catch (Exception ex)
         {//TODO: MAYBE DUPLICATE CAN BE CREATED HERE?
-            Console.WriteLine(ex);
+            Console.WriteLine(ex.Message);
             return false;
         }
     }
-    private static string SaveInSQLite(string folderName, string songName, string songGUID, SQLiteConnection connection, bool uploadFile = true)
+    private static string SaveInSQLite(string folderName, string songName, string songID, SQLiteConnection connection, bool uploadFile = true)
     {//TODO: make uploadFile do something
-        var cmd = new SQLiteCommand($"INSERT INTO allMusic(songGUID, name, absolutepath, uploadfile) VALUES (@songGUID, @songName, @absolutepath, @uploadfile)", connection);
+        var cmd = new SQLiteCommand($"INSERT INTO allMusic(songID, name, absolutepath, uploadfile) VALUES (@songID, @songName, @absolutepath, @uploadfile)", connection);
 
-        cmd.Parameters.AddWithValue("@songGUID", songGUID);
+        cmd.Parameters.AddWithValue("@songID", songID);
         cmd.Parameters.AddWithValue("@songName", songName);
         cmd.Parameters.AddWithValue("@absolutepath", folderName);
         cmd.Parameters.AddWithValue("@uploadfile", uploadFile);
@@ -100,7 +99,7 @@ class UserDatabase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Console.WriteLine(ex.Message);
         }
 
 
@@ -121,7 +120,7 @@ class UserDatabase
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Console.WriteLine(ex.Message);
             return "Failed";
         }
     }
@@ -172,7 +171,7 @@ class UserDatabase
         string[,] resultArray = new string[rowCount, 3];
 
         int currentIndex = 0;
-        string syntax = $"SELECT songGUID, name, uploadfile FROM allMusic";
+        string syntax = $"SELECT songID, name, uploadfile FROM allMusic";
 
         using (var command = new SQLiteCommand(syntax, connection))
         {
@@ -180,7 +179,7 @@ class UserDatabase
             while (reader.Read())
             {
                 // Store each value in the array
-                resultArray[currentIndex, 0] = reader.IsDBNull(0) ? "" : reader.GetString(0); // songGUID
+                resultArray[currentIndex, 0] = reader.IsDBNull(0) ? "" : reader.GetString(0); // songID
                 resultArray[currentIndex, 1] = reader.IsDBNull(1) ? "" : reader.GetString(1); // name
                 resultArray[currentIndex, 2] = reader.IsDBNull(2) ? "" : reader.GetString(2); // uploadfile
 

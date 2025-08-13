@@ -1,8 +1,10 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Microsoft.VisualBasic;
 
 namespace AvaloniaTest
 {
@@ -15,7 +17,7 @@ namespace AvaloniaTest
             InitializeComponent();
             DataContext = _viewModel;
 
-            //_viewModel.LoadMusicFiles("D:\\Projects\\SyncMP3\\MUSICFORTESTING\\");
+            PresentMessagesAndServerConnection(this, new RoutedEventArgs());
         }
 
         private async void SelectFolder_Click(object? sender, RoutedEventArgs e)
@@ -77,9 +79,9 @@ namespace AvaloniaTest
         {
             var (passKey, message) = await EndPoints.CreateDataBase();
 
-            if (passKey == "Already part of a Network")
+            if (message != null && message.StartsWith("Error"))
             {
-                DisplayResponse.Text = passKey;
+                DisplayResponse.Text = message;
             }
             else
             {
@@ -92,6 +94,46 @@ namespace AvaloniaTest
             string? message = await EndPoints.SendSQLToServer();
 
             DisplayResponse.Text = message;
+        }
+        private async void Button_RequestNewPasskey(object sender, RoutedEventArgs e)
+        {
+            var (message, code) = await EndPoints.RequestNewPassKey();
+
+            DisplayResponse.Text = message + "\n" + code;
+        }
+        private async void Button_OnReadDigits(object sender, RoutedEventArgs e)
+        {
+            string passKey = "";
+            if (InputBoxCode.Text != null)
+            {
+                passKey = InputBoxCode.Text;
+                string message = await EndPoints.TryJoinNetWork(passKey);
+
+                DisplayResponse.Text = message;
+            }
+            else
+            {
+                DisplayResponse.Text = "No Input";
+                return;
+            }
+        }
+        private async void PresentMessagesAndServerConnection(object sender, RoutedEventArgs e)
+        {
+            string result = await StartUpAction.TrySendPing();
+
+            string final = "";
+            string compareResult = "";
+            if (result.StartsWith("connected"))
+            {
+                compareResult = await EndPoints.SendSQLToServer();
+            }
+
+            final = compareResult + "\r" + result;
+
+            DisplayResponse.Text = final;
+
+
+            //EndPoints.DeleteOldMessages
         }
     }
 }

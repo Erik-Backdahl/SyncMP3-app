@@ -4,8 +4,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AvaloniaTest"
         xmlns:converters="clr-namespace:AvaloniaTest.Converters"
-        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="750"
-        Width="900" Height="750"
+        mc:Ignorable="d" d:DesignWidth="950" d:DesignHeight="750"
+        Width="950" Height="750"
         x:Class="AvaloniaTest.MainWindow"
         x:DataType="local:MainWindowViewModel"
         Title="AvaloniaTest">
@@ -57,19 +57,23 @@
 
         <Grid Grid.Column="1" ShowGridLines="True"> <!--TOP LEFT-->
                 <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="20"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="50"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
-
-                <Button Content="Create" Click="Button_Create" Foreground="White" Background="Red"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="0,5,0,0">
                 <Button Content="Send Data" Click="Button_SendSQLData" Foreground="White" Background="Red"/>
+                <Button Content="Update" Click="PresentMessagesAndServerConnection" Foreground="White" Background="Red"/>
+                <Button Content="Create" Click="Button_Create" Foreground="White" Background="Red" Margin="10,0,0,0"/>
+                <Button Content="Create Password" Click="Button_RequestNewPasskey" Foreground="White" Background="Red"/>
+                <Button Content="Read Digits" Click="Button_OnReadDigits" Foreground="White" Background="Red"/>
+                <TextBox Name="InputBoxCode" Width="90" MaxLength="6" Watermark="Enter code" HorizontalContentAlignment="Center" Foreground="Gray" Background="White"/>
             </StackPanel>
-                <TextBlock x:Name="DisplayResponse" TextWrapping="Wrap"  Grid.Column="1" Grid.Row="1" Text="---" />
+
+                <TextBlock Name="DisplayResponse" TextWrapping="Wrap"  Grid.Column="1" Grid.Row="1" Text="---" />
         </Grid>
 
         <!-- Your existing StackPanel in row 0, column 1 -->

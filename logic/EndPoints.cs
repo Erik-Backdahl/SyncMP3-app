@@ -1,9 +1,5 @@
 using System;
 using System.Net.Http;
-using System.Text.Json;
-using System.Data.SQLite;
-using System.Collections.Generic;
-using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,9 +10,6 @@ class EndPoints
     {
         try
         {
-            if (ModifyAppSettings.GetGUID() != string.Empty)
-                return ("Already part of a Network", ""); 
-
             var client = new HttpClient();
             var request = ParseHTTP.HTTPRequestFormat("GET", "/create-network");
 
@@ -26,9 +19,7 @@ class EndPoints
 
             var (headers, message) = await ParseHTTP.GetResponseHeadersAndMessage(response);
 
-            if (headers.TryGetValue("X-passKey", out var passKey))
-                Console.WriteLine($"X-passKey: {passKey}");
-
+            headers.TryGetValue("X-passKey", out var passKey);
             headers.TryGetValue("X-GUID", out var GUID);
 
             if (GUID != null)
@@ -38,12 +29,11 @@ class EndPoints
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            Console.WriteLine(ex.Message);
+            return (ex.Message, "Error: Likely failed to connect to server");
         }
-
-
     }
-    public static string AddAllSongToDataBase()
+    public static string AddAllSongToClientDataBase()
     {
         string[] allFolders = ModifyAppSettings.ReadAllFolderLocations();
         if (allFolders[0] == null)
@@ -59,6 +49,7 @@ class EndPoints
     {
         try
         {
+            AddAllSongToClientDataBase();
             string data = UserDatabase.ConvertDatabaseToJSON();
 
             var client = new HttpClient();
@@ -83,5 +74,46 @@ class EndPoints
             Console.WriteLine(ex.Message);
             return ex.Message;
         }
+    }
+
+    internal static async Task<(string? message, string? code)> RequestNewPassKey()
+    {
+        try
+        {
+            var client = new HttpClient();
+            var request = ParseHTTP.HTTPRequestFormat("POST", "/generate-passkey");
+
+            request.Headers.Add("UUID", ModifyAppSettings.GetUUID());
+            request.Headers.Add("GUID", ModifyAppSettings.GetGUID());
+
+            var response = client.SendAsync(request).Result;
+
+            var (header, message) = await ParseHTTP.GetResponseHeadersAndMessage(response);
+
+            header.TryGetValue("X-passKey", out var passKey);
+
+            return (message, passKey);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return (ex.Message, "");
+        }
+    }
+    internal static async Task<string> TryJoinNetWork(string passKey)
+    {
+        if (!string.IsNullOrEmpty(ModifyAppSettings.GetGUID()))
+            return "Already apart of a network";
+
+        var client = new HttpClient();
+        var request = ParseHTTP.HTTPRequestFormat("POST", "/add-user");
+
+
+        request.Headers.Add("UUID", passKey);
+        request.Headers.Add("passKey", passKey);
+
+        //request.Headers.Add();
+
+        return "";
     }
 }

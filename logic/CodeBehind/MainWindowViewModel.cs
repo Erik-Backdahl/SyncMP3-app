@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using Avalonia.Rendering.Composition;
 using AvaloniaTest.Services;
 using ReactiveUI;
 
@@ -33,7 +34,6 @@ namespace AvaloniaTest
             MusicFolder.TryGetValue(songName, out string? folderName);
             if (folderName == null)
                 throw new Exception("folderName of selected song not found, song name likely changed");
-            //if not found try to reload music because the most likely cause is the song has been changed
 
             await _audioService.PlayAsync(folderName, songName);
         }
@@ -53,29 +53,45 @@ namespace AvaloniaTest
             {
                 _audioService.Resume();
             }
-            
+
         }
         public void Stop()
         {
             _audioService.Stop();
         }
 
-        public void LoadMusicFiles(string folderPath)
+        public void LoadMusicFiles(string[] folderPath)
         {
             var supportedExtensions = new[] { ".mp3", ".wav", ".flac", ".ogg", ".aac" };
 
-            if (Directory.Exists(folderPath))
+            List<string> allFiles = new List<string>();
+            
+            for (int i = 0; i < folderPath.Length; i++)
             {
-                var files = Directory
-                    .EnumerateFiles(folderPath)
-                    .Where(f => supportedExtensions.Contains(Path.GetExtension(f).ToLower()));
-
-                MusicFiles.Clear();
-                foreach (var file in files)
+                if (Directory.Exists(folderPath[i]))
                 {
-                    MusicFiles.Add(Path.GetFileName(file));
-                    MusicFolder.Add(Path.GetFileName(file), Path.GetDirectoryName(file) ?? string.Empty);
+                    var files = Directory
+                        .EnumerateFiles(folderPath[i])
+                        .Where(f => supportedExtensions.Contains(Path.GetExtension(f).ToLower()))
+                        .ToList();
+
+                    // Add these files to the overall list
+                    allFiles.AddRange(files);
                 }
+                else
+                {
+                    Console.WriteLine(folderPath[i] + " failed to load");
+                }
+            }
+            
+            // Now, you can use 'allFiles' outside the loop
+            MusicFiles.Clear();
+            MusicFolder.Clear();
+
+            foreach (var file in allFiles)
+            {
+                MusicFiles.Add(Path.GetFileName(file));
+                MusicFolder.Add(Path.GetFileName(file), Path.GetDirectoryName(file) ?? string.Empty);
             }
         }
     }

@@ -3,6 +3,8 @@ using System.IO;
 using System.Data.SQLite;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Data;
+using Tmds.DBus.Protocol;
 class UserDatabase
 {  
     public static string ConvertDatabaseToJSON()
@@ -79,13 +81,13 @@ class UserDatabase
                 return false;
         }
         catch (Exception ex)
-        {//TODO: MAYBE DUPLICATE CAN BE CREATED HERE?
+        {
             Console.WriteLine(ex.Message);
-            return false;
+            throw new Exception(ex.Message);
         }
     }
-    private static string SaveInSQLite(string folderName, string songName, string songID, SQLiteConnection connection, bool uploadFile = true)
-    {//TODO: make uploadFile do something
+    private static void SaveInSQLite(string folderName, string songName, string songID, SQLiteConnection connection, bool uploadFile = true)
+    {
         var cmd = new SQLiteCommand($"INSERT INTO allMusic(songID, name, absolutepath, uploadfile) VALUES (@songID, @songName, @absolutepath, @uploadfile)", connection);
 
         cmd.Parameters.AddWithValue("@songID", songID);
@@ -100,10 +102,8 @@ class UserDatabase
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            throw new Exception(ex.Message);
         }
-
-
-        return "";
     }
     public static string TagFile(string folder, string fileName)
     {
@@ -121,7 +121,7 @@ class UserDatabase
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            return "Failed";
+            throw new Exception(ex.Message);
         }
     }
     public static string ReadTag(string folder, string fileName)
@@ -168,10 +168,10 @@ class UserDatabase
         }
 
         // Initialize the 3D array: [rows, 1, 3]
-        string[,] resultArray = new string[rowCount, 3];
+        string[,] resultArray = new string[rowCount, 4];
 
         int currentIndex = 0;
-        string syntax = $"SELECT songID, name, uploadfile FROM allMusic";
+        string syntax = $"SELECT songID, name, uploadfile, absolutepath FROM allMusic";
 
         using (var command = new SQLiteCommand(syntax, connection))
         {
@@ -181,7 +181,8 @@ class UserDatabase
                 // Store each value in the array
                 resultArray[currentIndex, 0] = reader.IsDBNull(0) ? "" : reader.GetString(0); // songID
                 resultArray[currentIndex, 1] = reader.IsDBNull(1) ? "" : reader.GetString(1); // name
-                resultArray[currentIndex, 2] = reader.IsDBNull(2) ? "" : reader.GetString(2); // uploadfile
+                resultArray[currentIndex, 2] = reader.IsDBNull(2) ? "" : reader.GetInt16(2).ToString(); // uploadfile
+                resultArray[currentIndex, 3] = reader.IsDBNull(1) ? "" : reader.GetString(3); // absolutepath
 
                 currentIndex++;
             }

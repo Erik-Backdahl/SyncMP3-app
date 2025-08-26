@@ -1,8 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Text.Json;
+using Avalonia.Platform.Storage;
+using Avalonia.Controls;
+using System.Security.Principal;
 
 class ModifyAppSettings
 {
@@ -18,7 +19,7 @@ class ModifyAppSettings
         else
             return "Failed Download Folder not found";
     }
-    public static string[] ReadAllFolderLocations()
+    public static string[] ReadRegisteredMusicFolders()
     {
         // Read the JSON file content
         string jsonData = File.ReadAllText(jsonFilePath);
@@ -30,6 +31,19 @@ class ModifyAppSettings
             return settings.RegisterdFolders;
         else
             return [];
+    }
+    internal static void AddRegisteredFolder(string folder)
+    {
+        string jsonData = File.ReadAllText(jsonFilePath);
+
+        JsonFormat? root = JsonSerializer.Deserialize<JsonFormat>(jsonData);
+
+        if (root != null)
+        {
+            //check if the folder already exists
+           
+           
+        }
     }
     public static string GetUUID()
     {
@@ -54,7 +68,6 @@ class ModifyAppSettings
         else
             throw new AppSettingsFileNotFoundException();
     }
-
     public static string GetGUID()
     {
         string jsonData = File.ReadAllText(jsonFilePath);
@@ -72,7 +85,6 @@ class ModifyAppSettings
         else
             throw new AppSettingsFileNotFoundException();
     }
-
     internal static void RegisterGUID(string GUID)
     {
         string jsonData = File.ReadAllText(jsonFilePath);

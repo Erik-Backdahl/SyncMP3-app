@@ -38,7 +38,8 @@
             </Grid.RowDefinitions>
                 <Image Source="avares://AvaloniaTest/Assets/images/reduce.png" Stretch="Fill" Width="100" Height="49"/>
 
-                <Button Grid.Column="2" Content="Folder" Click="SelectFolder_Click" Foreground="White" Background="Red"/>
+                <Button x:Name="FolderButton" Grid.Column="2" Content="AddFolder" Click="AddFolder_Click" Foreground="White" Background="Red"/>
+                <Button x:Name="UpdateButton" Grid.Column="1" Content="Update" Click="UpdateMusic_click" Foreground="White" Background="Red"/>
 
                 <TextBlock Grid.Column="2" Grid.Row="1" Text="Volume slider" Foreground="White" Padding="20"/>
 
@@ -65,11 +66,11 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="0,5,0,0">
-                <Button Content="Send Data" Click="Button_SendSQLData" Foreground="White" Background="Red"/>
-                <Button Content="Update" Click="PresentMessagesAndServerConnection" Foreground="White" Background="Red"/>
-                <Button Content="Create" Click="Button_Create" Foreground="White" Background="Red" Margin="10,0,0,0"/>
-                <Button Content="Create Password" Click="Button_RequestNewPasskey" Foreground="White" Background="Red"/>
-                <Button Content="Read Digits" Click="Button_OnReadDigits" Foreground="White" Background="Red"/>
+                <Button x:Name="SendSQLData" Content="Send Data" Click="Button_SendSQLData" Foreground="White" Background="Red"/>
+                <Button x:Name="Ping" Content="Ping" Click="Button_Ping" Foreground="White" Background="Red"/>
+                <Button x:Name="Create" Content="Create" Click="Button_Create" Foreground="White" Background="Red" Margin="10,0,0,0"/>
+                <Button x:Name="RequestNewPasskey" Content="Create Password" Click="Button_RequestNewPasskey" Foreground="White" Background="Red"/>
+                <Button x:Name="OnReadDigits" Content="Read Digits" Click="Button_OnReadDigits" Foreground="White" Background="Red"/>
                 <TextBox Name="InputBoxCode" Width="90" MaxLength="6" Watermark="Enter code" HorizontalContentAlignment="Center" Foreground="Gray" Background="White"/>
             </StackPanel>
 

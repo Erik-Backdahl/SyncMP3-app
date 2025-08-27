@@ -15,7 +15,6 @@ namespace AvaloniaTest
             InitializeComponent();
             DataContext = viewModel;
 
-            viewModel.LoadMusicFiles(ModifyAppSettings.ReadRegisteredMusicFolders());
             UpdateMusic_click(this, new RoutedEventArgs());
             Button_Ping(this, new RoutedEventArgs());
         }
@@ -220,16 +219,16 @@ namespace AvaloniaTest
             {
                 DisableOtherButtons();
 
-                string result = await EndPoints.TrySendPing();
+                string pingResult = await EndPoints.TrySendPing();
 
                 string final = "";
                 string compareResult = "";
-                if (result.StartsWith("connected"))
+                if (pingResult.StartsWith("connected"))
                 {
                     compareResult = await EndPoints.SendSQLToServer();
                 }
 
-                final = compareResult + "\r" + result;
+                final = pingResult + "\r" + compareResult;
                 DisplayResponse.Text = final;
 
             }

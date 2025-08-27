@@ -36,52 +36,27 @@ class EndPoints
             return (ex.Message, "Error: Likely failed to connect to server");
         }
     }
-    private static void AddAllSongToClientDataBase()
-    {
-        try
-        {
-            string[] allFolders = ModifyAppSettings.ReadRegisteredMusicFolders();
-            if (allFolders[0] == null)
-                throw new Exception("No Folders available to search");
-
-            foreach (string musicFolder in allFolders)
-                UserDatabase.AddAllMusicNotInDatabase(musicFolder);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            throw new Exception(ex.Message);
-        }
-    }
-
     public static async Task<string> SendSQLToServer()
     {
-        try
-        {
-            AddAllSongToClientDataBase();
-            string data = UserDatabase.ConvertDatabaseToJSON();
 
-            var client = new HttpClient();
-            var request = ParseHTTP.HTTPRequestFormat("POST", "/compare");
+        AddAllSongToClientDataBase();
+        string data = UserDatabase.ConvertDatabaseToJSON();
 
-            request.Headers.Add("UUID", ModifyAppSettings.GetUUID());
-            request.Headers.Add("GUID", ModifyAppSettings.GetGUID());
+        var client = new HttpClient();
+        var request = ParseHTTP.HTTPRequestFormat("POST", "/compare");
 
-            var content = new StringContent(data, Encoding.UTF8, "application/json");
+        request.Headers.Add("UUID", ModifyAppSettings.GetUUID());
+        request.Headers.Add("GUID", ModifyAppSettings.GetGUID());
 
-            request.Content = content;
+        var content = new StringContent(data, Encoding.UTF8, "application/json");
 
-            var response = await client.SendAsync(request);
+        request.Content = content;
 
-            var (headers, message) = await ParseHTTP.GetResponseHeadersAndMessage(response);
+        var response = await client.SendAsync(request);
 
-            return message;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return ex.Message;
-        }
+        var (headers, message) = await ParseHTTP.GetResponseHeadersAndMessage(response);
+
+        return message;
     }
     public static async Task<string> SendMusicToServer(string[] requestedMusicIDs)
     {
@@ -92,7 +67,7 @@ class EndPoints
 
             var Client = new HttpClient();
 
-            string fullAdress = "http://localhost:4221" + "/upload";
+            string fullAdress = ParseHTTP.baseAddress + "/upload";
 
             int uploadSuccess = 0;
             int failedUpload = 0;
@@ -205,20 +180,26 @@ class EndPoints
 
             var (headers, message) = await ParseHTTP.GetResponseHeadersAndMessage(response);
 
-            string fullMessage = "connected. messages:\n";
-
             if (response.IsSuccessStatusCode)
             {
-                foreach (KeyValuePair<string, string> header in headers)
+                string fullMessage = "connected. ";
+                if (headers.Count > 0)
                 {
-                    fullMessage += header + ";\n";
+                    fullMessage += headers.Count + "Message(s) ";
+                    foreach (KeyValuePair<string, string> header in headers)
+                    {
+                        fullMessage += header + ";\n";
+                    }
+                    return fullMessage;
                 }
-                return fullMessage;
-
+                else
+                {
+                    return fullMessage + "No Messages ";
+                }
             }
             else
             {
-                return fullMessage;
+                return "ping failed";
             }
         }
         catch (Exception ex)
@@ -227,5 +208,12 @@ class EndPoints
             return "ping failed";
         }
 
+    }
+    private static void AddAllSongToClientDataBase()
+    {
+        string[] allFolders = ModifyAppSettings.ReadRegisteredMusicFolders();
+
+        foreach (string musicFolder in allFolders)
+            UserDatabase.AddAllMusicNotInDatabase(musicFolder);
     }
 }

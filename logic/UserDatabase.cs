@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Data;
 using Tmds.DBus.Protocol;
 class UserDatabase
-{  
+{
     public static string ConvertDatabaseToJSON()
     {
         var connection = UserDatabase.OpenSQLiteConnection();
@@ -192,7 +192,8 @@ class UserDatabase
     }
     public static SQLiteConnection OpenSQLiteConnection()
     {
-        string path = @"Data Source=C:\Users\Erik\VSC\SMALLPROJECTS\SyncMP3App\Data\DeviceMusicData.db";
+        string databasePath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Data\DeviceMusicData.db"));
+        string path = $@"Data Source={databasePath}";
         var connection = new SQLiteConnection(path);
         connection.Open();
         return connection;

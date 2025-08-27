@@ -62,36 +62,44 @@ namespace AvaloniaTest
 
         public void LoadMusicFiles(string[] folderPath)
         {
-            var supportedExtensions = new[] { ".mp3", ".wav", ".flac", ".ogg", ".aac" };
-
-            List<string> allFiles = new List<string>();
-            
-            for (int i = 0; i < folderPath.Length; i++)
+            try
             {
-                if (Directory.Exists(folderPath[i]))
-                {
-                    var files = Directory
-                        .EnumerateFiles(folderPath[i])
-                        .Where(f => supportedExtensions.Contains(Path.GetExtension(f).ToLower()))
-                        .ToList();
 
-                    // Add these files to the overall list
-                    allFiles.AddRange(files);
-                }
-                else
+                var supportedExtensions = new[] { ".mp3", ".wav", ".flac", ".ogg", ".aac" };
+
+                List<string> allFiles = new List<string>();
+
+                for (int i = 0; i < folderPath.Length; i++)
                 {
-                    Console.WriteLine(folderPath[i] + " failed to load");
+                    if (Directory.Exists(folderPath[i]))
+                    {
+                        var files = Directory
+                            .EnumerateFiles(folderPath[i])
+                            .Where(f => supportedExtensions.Contains(Path.GetExtension(f).ToLower()))
+                            .ToList();
+
+                        // Add these files to the overall list
+                        allFiles.AddRange(files);
+                    }
+                    else
+                    {
+                        Console.WriteLine(folderPath[i] + " failed to load");
+                    }
+                }
+
+                // Now, you can use 'allFiles' outside the loop
+                MusicFiles.Clear();
+                MusicFolder.Clear();
+
+                foreach (var file in allFiles)
+                {
+                    MusicFiles.Add(Path.GetFileName(file));
+                    MusicFolder.Add(Path.GetFileName(file), Path.GetDirectoryName(file) ?? string.Empty);
                 }
             }
-            
-            // Now, you can use 'allFiles' outside the loop
-            MusicFiles.Clear();
-            MusicFolder.Clear();
-
-            foreach (var file in allFiles)
+            catch
             {
-                MusicFiles.Add(Path.GetFileName(file));
-                MusicFolder.Add(Path.GetFileName(file), Path.GetDirectoryName(file) ?? string.Empty);
+                
             }
         }
     }

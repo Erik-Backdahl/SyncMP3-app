@@ -160,14 +160,14 @@ class EndPoints
         var client = new HttpClient();
         var request = ParseHTTP.HTTPRequestFormat("POST", "/add-user");
 
-        request.Headers.Add("UUID", passKey);
+        request.Headers.Add("UUID", ModifyAppSettings.GetUUID());
         request.Headers.Add("passKey", passKey);
 
         var response = await client.SendAsync(request);
 
         var (header, message) = await ParseHTTP.GetResponseHeadersAndMessage(response);
 
-        if (response.IsSuccessStatusCode && header.TryGetValue("GUID", out var GUID))
+        if (response.IsSuccessStatusCode && header.TryGetValue("X-GUID", out var GUID))
         {
             ModifyAppSettings.RegisterGUID(GUID);
             return message;

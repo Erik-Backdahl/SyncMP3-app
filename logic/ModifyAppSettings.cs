@@ -111,12 +111,7 @@ class ModifyAppSettings
         JsonFormat? root = JsonSerializer.Deserialize<JsonFormat>(jsonData);
         if (root != null)
         {
-            if (string.IsNullOrEmpty(root.GUID))
-            {
-                throw new NoNetWorkRegisterException();
-            }
-            else
-                return root.GUID;
+            return root.GUID;
         }
         else
             throw new AppSettingsFileNotFoundException();

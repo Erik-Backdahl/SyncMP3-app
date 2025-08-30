@@ -152,7 +152,7 @@ class EndPoints
             return (ex.Message, "");
         }
     }
-    internal static async Task<string> TryJoinNetWork(string passKey)
+    internal static async Task<string> TryJoinNetwork(string passKey)
     {
         if (!string.IsNullOrEmpty(ModifyAppSettings.GetGUID()))
             return "Already apart of a network";
@@ -160,13 +160,22 @@ class EndPoints
         var client = new HttpClient();
         var request = ParseHTTP.HTTPRequestFormat("POST", "/add-user");
 
-
         request.Headers.Add("UUID", passKey);
         request.Headers.Add("passKey", passKey);
 
-        //request.Headers.Add();
+        var response = await client.SendAsync(request);
 
-        return "";
+        var (header, message) = await ParseHTTP.GetResponseHeadersAndMessage(response);
+
+        if (response.IsSuccessStatusCode && header.TryGetValue("GUID", out var GUID))
+        {
+            ModifyAppSettings.RegisterGUID(GUID);
+            return message;
+        }
+        else
+        {
+            return message;
+        }
     }
     public static async Task<string> TrySendPing()
     {

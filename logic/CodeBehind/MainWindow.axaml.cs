@@ -208,10 +208,10 @@ namespace AvaloniaTest
                 DisableOtherButtons();
 
                 string passKey = "";
-                if (InputBoxCode.Text != null)
+                if (!string.IsNullOrEmpty(InputBoxCode.Text))
                 {
                     passKey = InputBoxCode.Text;
-                    string message = await EndPoints.TryJoinNetWork(passKey);
+                    string message = await EndPoints.TryJoinNetwork(passKey);
 
                     DisplayResponse.Text = message;
                 }

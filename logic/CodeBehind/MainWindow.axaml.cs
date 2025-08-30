@@ -15,8 +15,22 @@ namespace AvaloniaTest
             InitializeComponent();
             DataContext = viewModel;
 
-            UpdateMusic_click(this, new RoutedEventArgs());
-            Button_Ping(this, new RoutedEventArgs());
+            StartUpAction();
+        }
+        private void StartUpAction()
+        {
+            try
+            {
+                CreateEssentialFiles.CheckEssentialFiles();
+
+                UpdateMusic_click(null, new RoutedEventArgs());
+                Button_Ping(null, new RoutedEventArgs());
+            }
+            catch (Exception ex)
+            {
+                DisplayResponse.Text = ex.Message;
+                Console.WriteLine(ex.Message);
+            }
         }
         private void UpdateMusic_click(object? sender, RoutedEventArgs e)
         {
@@ -37,6 +51,10 @@ namespace AvaloniaTest
                 FolderButton.IsEnabled = true;
                 UpdateButton.IsEnabled = true;
             }
+        }
+        private void Button_Clicker(object sender, RoutedEventArgs e)
+        {
+
         }
         private async void AddFolder_Click(object? sender, RoutedEventArgs e)
         {
@@ -213,7 +231,7 @@ namespace AvaloniaTest
                 EnableOtherButtons();
             }
         }
-        private async void Button_Ping(object sender, RoutedEventArgs e)
+        private async void Button_Ping(object? sender, RoutedEventArgs e)
         {
             try
             {

@@ -193,6 +193,17 @@ class UserDatabase
     public static SQLiteConnection OpenSQLiteConnection()
     {
         string databasePath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Data\DeviceMusicData.db"));
+
+        if (!File.Exists(databasePath))
+        {
+            var directory = Path.GetDirectoryName(databasePath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            SQLiteConnection.CreateFile(databasePath);
+        }
+
         string path = $@"Data Source={databasePath}";
         var connection = new SQLiteConnection(path);
         connection.Open();

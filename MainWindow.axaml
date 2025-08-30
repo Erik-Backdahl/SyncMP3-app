@@ -40,6 +40,8 @@
 
                 <Button x:Name="FolderButton" Grid.Column="2" Content="AddFolder" Click="AddFolder_Click" Foreground="White" Background="Red"/>
                 <Button x:Name="UpdateButton" Grid.Column="1" Content="Update" Click="UpdateMusic_click" Foreground="White" Background="Red"/>
+                <Button x:Name="Clicker" Grid.Column="0" Content="Click" Click="Button_Clicker" Foreground="White" Background="Red"/>
+
 
                 <TextBlock Grid.Column="2" Grid.Row="1" Text="Volume slider" Foreground="White" Padding="20"/>
 

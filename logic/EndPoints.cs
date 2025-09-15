@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using TagLib.Mpeg4;
 using System.Collections.Generic;
+using System.Threading;
 
 class EndPoints
 {
@@ -36,9 +37,8 @@ class EndPoints
             return (ex.Message, "Error: Likely failed to connect to server");
         }
     }
-    public static async Task<string> SendSQLToServer()
+    public static async Task<(Dictionary<string, string>, string)> SendSQLToServer()
     {
-
         AddAllSongToClientDataBase();
         string data = UserDatabase.ConvertDatabaseToJSON();
 
@@ -56,7 +56,44 @@ class EndPoints
 
         var (headers, message) = await ParseHTTP.GetResponseHeadersAndMessage(response);
 
-        return message;
+        return (headers, message);
+    }
+    public static async Task<string> RequestAndReceiveMusic(string songID)
+    {
+        try
+        {
+
+            var client = new HttpClient();
+            var request = ParseHTTP.HTTPRequestFormat("GET", "/get-music");
+
+            request.Headers.Add("UUID", ModifyAppSettings.GetUUID());
+            request.Headers.Add("GUID", ModifyAppSettings.GetGUID());
+            request.Headers.Add("songID", songID);
+
+            var response = await client.SendAsync(request);
+            var (headers, songBytes) = await ParseHTTP.GetSongHeadersAndSongBytes(response);
+
+            headers.TryGetValue("X-songName", out string? unescapedSongName);
+
+            string songName = Uri.UnescapeDataString(unescapedSongName ?? throw new Exception("Recivied song has no name"));
+            string savePath = Path.Combine(ModifyAppSettings.ReadDownloadFolder(), songName);
+
+            System.IO.File.WriteAllBytes(savePath, songBytes);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return $"{songName} downloaded";
+            }
+            else
+            {
+                return "Error";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return "Error" + ex.Message;
+        }
     }
     public static async Task<string> SendMusicToServer(string[] requestedMusicIDs)
     {
@@ -65,7 +102,7 @@ class EndPoints
             var connection = UserDatabase.OpenSQLiteConnection();
             string[,] allMusicData = UserDatabase.GetSQLiteSongsData(connection);
 
-            var Client = new HttpClient();
+            var client = new HttpClient();
 
             string fullAdress = ParseHTTP.baseAddress + "/upload";
 
@@ -80,7 +117,6 @@ class EndPoints
                     {
                         string filePath = Path.Combine(allMusicData[i, 3], allMusicData[i, 1]);
 
-                        // Ensure the file exists
                         if (!System.IO.File.Exists(filePath))
                         {
                             Console.WriteLine($"File not found: {filePath}");
@@ -94,14 +130,14 @@ class EndPoints
                         content.Headers.ContentType = new MediaTypeHeaderValue("audio/mpeg");
                         content.Headers.Add("UUID", ModifyAppSettings.GetUUID());
                         content.Headers.Add("GUID", ModifyAppSettings.GetGUID());
-                        content.Headers.Add("SongID", allMusicData[i, 0]);
+                        content.Headers.Add("songID", allMusicData[i, 0]);
 
                         string songName = allMusicData[i, 1];
                         string encoded = Uri.EscapeDataString(songName);
 
                         content.Headers.Add("SongName", encoded);
 
-                        var response = await Client.PostAsync(fullAdress, content);
+                        var response = await client.PostAsync(fullAdress, content);
                         var (headers, message) = await ParseHTTP.GetResponseHeadersAndMessage(response);
 
                         if (response.IsSuccessStatusCode)

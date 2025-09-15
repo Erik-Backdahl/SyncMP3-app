@@ -2,7 +2,10 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using System.Threading.Tasks;
 using DynamicData.Kernel;
+using TagLib.Id3v2;
+using System.Net;
 
 namespace AvaloniaTest
 {
@@ -161,26 +164,6 @@ namespace AvaloniaTest
                 EnableOtherButtons();
             }
         }
-        private async void Button_SendSQLData(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                DisableOtherButtons();
-
-                string? message = await EndPoints.SendSQLToServer();
-
-                DisplayResponse.Text = message;
-            }
-            catch (Exception ex)
-            {
-                DisplayResponse.Text = ex.Message;
-                Console.WriteLine(ex.Message);
-            }
-            finally
-            {
-                EnableOtherButtons();
-            }
-        }
         private async void Button_RequestNewPasskey(object sender, RoutedEventArgs e)
         {
             try
@@ -243,12 +226,45 @@ namespace AvaloniaTest
                 string compareResult = "";
                 if (pingResult.StartsWith("connected"))
                 {
-                    compareResult = await EndPoints.SendSQLToServer();
+                    var (headers, message) = await EndPoints.SendSQLToServer();
                 }
 
                 final = pingResult + "\r" + compareResult;
                 DisplayResponse.Text = final;
 
+            }
+            catch (Exception ex)
+            {
+                DisplayResponse.Text = ex.Message;
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                EnableOtherButtons();
+            }
+        }
+        private async void Button_SendSQLData(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                DisableOtherButtons();
+
+                var (headers, message) = await EndPoints.SendSQLToServer();
+
+                if (headers.TryGetValue("X-NewSongs", out string? newSongs) && int.TryParse(newSongs, out int ammountNewSongs))
+                {
+                    for (int i = 0; i < ammountNewSongs; i++)
+                    {
+                        headers.TryGetValue($"X-Song{i}", out string? songID);
+                        if (songID != null)
+                        {
+                            await EndPoints.RequestAndReceiveMusic(songID);
+                            Console.WriteLine("Transfer success");
+                        }
+                    }
+                }
+
+                DisplayResponse.Text = message;
             }
             catch (Exception ex)
             {

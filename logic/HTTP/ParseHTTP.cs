@@ -39,4 +39,17 @@ class ParseHTTP
 
         return (headers, message);
     }
+    public static async Task<(Dictionary<string, string>, byte[] musicBody)> GetSongHeadersAndSongBytes(HttpResponseMessage serverResponse)
+    {
+        var headers = new Dictionary<string, string>();
+
+        foreach (var header in serverResponse.Headers)
+        {
+            headers[header.Key] = string.Join(", ", header.Value);
+        }
+
+        byte[] musicBody = await serverResponse.Content.ReadAsByteArrayAsync();
+
+        return (headers, musicBody);
+    }
 }

@@ -197,7 +197,7 @@ class UserDatabase
         if (!File.Exists(databasePath))
         {
             var directory = Path.GetDirectoryName(databasePath);
-            if (!Directory.Exists(directory))
+            if (!Directory.Exists(directory) && directory != null)
             {
                 Directory.CreateDirectory(directory);
             }

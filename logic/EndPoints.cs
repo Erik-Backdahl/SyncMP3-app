@@ -39,7 +39,8 @@ class EndPoints
     }
     public static async Task<(Dictionary<string, string>, string)> SendSQLToServer()
     {
-        AddAllSongToClientDataBase();
+        await UserDatabase.AddAllMusicNotInDatabase();
+        await UserDatabase.DeleteEmptyEntiresInDatabase();
         string data = UserDatabase.ConvertDatabaseToJSON();
 
         var client = new HttpClient();
@@ -58,7 +59,7 @@ class EndPoints
 
         return (headers, message);
     }
-    public static async Task<string> RequestAndReceiveMusic(string songID)
+    public static async Task<(bool, string)> RequestAndReceiveMusic(string songID)
     {
         try
         {
@@ -75,24 +76,26 @@ class EndPoints
 
             headers.TryGetValue("X-songName", out string? unescapedSongName);
 
-            string songName = Uri.UnescapeDataString(unescapedSongName ?? throw new Exception("Recivied song has no name"));
-            string savePath = Path.Combine(ModifyAppSettings.ReadDownloadFolder(), songName);
-
-            System.IO.File.WriteAllBytes(savePath, songBytes);
-
-            if (response.IsSuccessStatusCode)
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                return $"{songName} downloaded";
+                return (false, "Error. Song not currently downloaded but a request has been scheduled");
             }
             else
             {
-                return "Error";
+                string songName = Uri.UnescapeDataString(unescapedSongName ?? throw new Exception("Recivied song has no name"));
+                string savePath = Path.Combine(ModifyAppSettings.ReadDownloadFolder(), songName);
+
+                System.IO.File.WriteAllBytes(savePath, songBytes);
+
+                return (true, $"success {songName} downloaded");
+
+
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            return "Error" + ex.Message;
+            return (false, "Error" + ex.Message);
         }
     }
     public static async Task<string> SendMusicToServer(string[] requestedMusicIDs)
@@ -253,12 +256,5 @@ class EndPoints
             return "ping failed";
         }
 
-    }
-    private static void AddAllSongToClientDataBase()
-    {
-        string[] allFolders = ModifyAppSettings.ReadRegisteredMusicFolders();
-
-        foreach (string musicFolder in allFolders)
-            UserDatabase.AddAllMusicNotInDatabase(musicFolder);
     }
 }

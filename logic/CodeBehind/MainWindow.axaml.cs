@@ -27,7 +27,7 @@ namespace AvaloniaTest
                 CreateEssentialFiles.CheckEssentialFiles();
 
                 UpdateMusic_click(null, new RoutedEventArgs());
-                Button_Ping(null, new RoutedEventArgs());
+                Button_SendSQLData(null, new RoutedEventArgs());
             }
             catch (Exception ex)
             {
@@ -214,57 +214,58 @@ namespace AvaloniaTest
                 EnableOtherButtons();
             }
         }
-        private async void Button_Ping(object? sender, RoutedEventArgs e)
+        private async void Button_SendSQLData(object? sender, RoutedEventArgs e)
         {
             try
             {
                 DisableOtherButtons();
 
-                string pingResult = await EndPoints.TrySendPing();
+                string connectionResult = await EndPoints.TrySendPing();
 
-                string final = "";
-                string compareResult = "";
-                if (pingResult.StartsWith("connected"))
+                if (connectionResult.StartsWith("connected"))
                 {
                     var (headers, message) = await EndPoints.SendSQLToServer();
-                }
 
-                final = pingResult + "\r" + compareResult;
-                DisplayResponse.Text = final;
+                    int successfulDownloads = 0;
+                    int unSuccessfulDownloads = 0;
 
-            }
-            catch (Exception ex)
-            {
-                DisplayResponse.Text = ex.Message;
-                Console.WriteLine(ex.Message);
-            }
-            finally
-            {
-                EnableOtherButtons();
-            }
-        }
-        private async void Button_SendSQLData(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                DisableOtherButtons();
 
-                var (headers, message) = await EndPoints.SendSQLToServer();
-
-                if (headers.TryGetValue("X-NewSongs", out string? newSongs) && int.TryParse(newSongs, out int ammountNewSongs))
-                {
-                    for (int i = 0; i < ammountNewSongs; i++)
+                    if (headers.TryGetValue("X-NewSongs", out string? newSongs) && int.TryParse(newSongs, out int ammountNewSongs))
                     {
-                        headers.TryGetValue($"X-Song{i}", out string? songID);
-                        if (songID != null)
-                        {
-                            await EndPoints.RequestAndReceiveMusic(songID);
-                            Console.WriteLine("Transfer success");
-                        }
+                        if (ammountNewSongs > 0)
+                            message += $"\t {ammountNewSongs} Songs requested from server";
+                        for (int i = 1; i < ammountNewSongs + 1; i++)
+                            {
+                                headers.TryGetValue($"X-Song{i}", out string? songID);
+                                if (songID != null)
+                                {
+                                    var (succes, resultMessage) = await EndPoints.RequestAndReceiveMusic(songID);
+                                    Console.WriteLine(resultMessage);
+                                    if (succes)
+                                    {
+                                        successfulDownloads++;
+                                    }
+                                    else
+                                    {
+                                        unSuccessfulDownloads++;
+                                    }
+
+                                }
+                            }
                     }
+                    if (successfulDownloads > 0)
+                    {
+                        message += $"{successfulDownloads} Song(s) downloaded successfully";
+                    }
+                    if (unSuccessfulDownloads != 0)
+                    {
+                        message += $"\n {unSuccessfulDownloads} song(s) failed to download but have been requested";
+                    }
+                    DisplayResponse.Text = message;
                 }
 
-                DisplayResponse.Text = message;
+                DisplayResponse2.Text = connectionResult;
+
             }
             catch (Exception ex)
             {
@@ -279,7 +280,6 @@ namespace AvaloniaTest
         private void DisableOtherButtons()
         {
             SendSQLData.IsEnabled = false;
-            Ping.IsEnabled = false;
             Create.IsEnabled = false;
             RequestNewPasskey.IsEnabled = false;
             OnReadDigits.IsEnabled = false;
@@ -287,7 +287,6 @@ namespace AvaloniaTest
         private void EnableOtherButtons()
         {
             SendSQLData.IsEnabled = true;
-            Ping.IsEnabled = true;
             Create.IsEnabled = true;
             RequestNewPasskey.IsEnabled = true;
             OnReadDigits.IsEnabled = true;

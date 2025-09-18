@@ -5,11 +5,13 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Data;
 using Tmds.DBus.Protocol;
+using System.Linq;
+using System.Threading.Tasks;
 class UserDatabase
 {
     public static string ConvertDatabaseToJSON()
     {
-        var connection = UserDatabase.OpenSQLiteConnection();
+        var connection = OpenSQLiteConnection();
 
         string tableName = "allMusic";
 
@@ -33,38 +35,108 @@ class UserDatabase
         string json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
         return json;
     }
-    public static string[,] AddAllMusicNotInDatabase(string folder)
+    public static Task AddAllMusicNotInDatabase()
     {
         using var connection = OpenSQLiteConnection();
 
-        string[] musicFolder = GetFileNamesFromFolder(folder);
+        string[] allFolders = ModifyAppSettings.ReadRegisteredMusicFolders();
 
-        string[,] musicAddedToDatabase = new string[musicFolder.Length, 2];
+        string[] allMusicNames = GetFileNamesFromAllFolders();
 
-        for (int i = 0; i < musicFolder.Length; i++)
+
+        foreach (string individualFolder in allFolders)
         {
-            string songTag = ReadTag(folder, musicFolder[i]);
+            string[] currentFoldersSongsNames = Directory.GetFiles(individualFolder);
 
-            if (songTag.StartsWith("Failed to find ID"))
-            {//does not have ID give it one
-                songTag = TagFile(folder, musicFolder[i]);
-            }
+            for (int i = 0; i < currentFoldersSongsNames.Length; i++)
+            {
+                string songTag = ReadTag(currentFoldersSongsNames[i]);
 
-            if (!FoundSongInDataBase(songTag, connection))
-            {
-                musicAddedToDatabase[i, 0] = musicFolder[i];
-                musicAddedToDatabase[i, 1] = songTag;
-                SaveInSQLite(folder, musicFolder[i], songTag, connection);
+                if (songTag.StartsWith("Failed to find ID"))
+                {//does not have ID give it one
+                    songTag = TagFile(currentFoldersSongsNames[i]);
+                }
+
+                if (!FoundSongInDataBase(songTag, connection))
+                {
+                    SaveInSQLite(individualFolder, currentFoldersSongsNames[i], songTag, connection);
+                }
+                else
+                {
+                    //VerifySQLiteEntry(musicFolder[i], folder, songTag);
+                    //TODO verify each song in the db eg: folderlocation has changed or name has changed 
+                }
             }
-            else
+        }
+        return Task.CompletedTask;
+    }
+    public static Task DeleteEmptyEntiresInDatabase()
+    {
+        using var connection = OpenSQLiteConnection();
+
+        string syntax = "SELECT absolutepath, name FROM allMusic";
+        var cmd = new SQLiteCommand(syntax, connection);
+
+        var reader = cmd.ExecuteReader();
+
+        List<string> allAbsolutePathsInDatabase = [];
+
+        while (reader.Read())
+        {
+            allAbsolutePathsInDatabase.Add(reader.GetString(0) + reader.GetString(1));
+        }
+        string[] allFolders = ModifyAppSettings.ReadRegisteredMusicFolders();
+
+        List<string> allCurrentDownloadedSongs = [];
+
+        foreach (string folder in allFolders)
+        {
+            string[] currentFoldersSongsNames = Directory.GetFiles(folder);
+
+            foreach (string songPath in currentFoldersSongsNames)
             {
-                //VerifySQLiteEntry(musicFolder[i], folder, songTag);
-                //TODO verify each song in the db eg: folderlocation has changed or name has changed 
+                allCurrentDownloadedSongs.Add(songPath);
             }
         }
 
-        return musicAddedToDatabase;
+        foreach (string songInDatabase in allAbsolutePathsInDatabase)
+        {
+            bool songFound = false;
+            foreach (string currentDownloadedSong in allCurrentDownloadedSongs)
+            {
+                if (songInDatabase == currentDownloadedSong)
+                {
+                    songFound = true;
+                    break;
+                }
+            }
+
+            if (!songFound)
+            {
+                DeleteEntryInDatabase(Path.GetFileName(songInDatabase), connection);
+            }
+        }
+
+        return Task.CompletedTask;
     }
+    private static void DeleteEntryInDatabase(string songName, SQLiteConnection connection)
+    {
+        string syntax = "DELETE FROM allMusic WHERE name=@name";
+
+        var cmd = new SQLiteCommand(syntax, connection);
+        cmd.Parameters.AddWithValue("@name", songName);
+
+        try
+        {
+            cmd.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw new Exception("Failed to delete entry in Database");
+        }
+    }
+
     private static bool FoundSongInDataBase(string songID, SQLiteConnection connection)
     {//TODO check if there is a song that has duplicate name in db
         string syntax = $"SELECT songID FROM allMusic WHERE songID=@songID";
@@ -105,12 +177,11 @@ class UserDatabase
             throw new Exception(ex.Message);
         }
     }
-    public static string TagFile(string folder, string fileName)
+    public static string TagFile(string filePath)
     {
-        string path = $@"{folder}{fileName}";
         try
         {
-            var file = TagLib.File.Create(path);
+            var file = TagLib.File.Create(filePath);
 
             string uniqueId = Guid.NewGuid().ToString();
             file.Tag.Comment = $"UniqueID:{uniqueId}";
@@ -124,10 +195,8 @@ class UserDatabase
             throw new Exception(ex.Message);
         }
     }
-    public static string ReadTag(string folder, string fileName)
+    public static string ReadTag(string filePath)
     {
-        string filePath = folder + fileName;
-
         var file = TagLib.File.Create(filePath);
 
         string comment = file.Tag.Comment;
@@ -142,19 +211,22 @@ class UserDatabase
             return "Failed to find ID";
         }
     }
-    private static string[] GetFileNamesFromFolder(string folderPath)
+    private static string[] GetFileNamesFromAllFolders()
     {// folderPath = C/stuff/music //NOT PATH TO A SINGLE FILE
-        string[] files = Directory.GetFiles(folderPath);
-
-        string[] fileData = new string[files.Length];
-
-        for (int i = 0; i < files.Length; i++)
+        string[] allRegisteredFolders = ModifyAppSettings.ReadRegisteredMusicFolders();
+        var allMusicNames = new List<string>();
+        foreach (string folder in allRegisteredFolders)
         {
-            string fileName = Path.GetFileName(files[i]);
-            fileData[i] = fileName;
+            string[] files = Directory.GetFiles(folder);
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                string fileName = Path.GetFileName(files[i]);
+                allMusicNames.Add(fileName);
+            }
         }
 
-        return fileData;
+        return allMusicNames.ToArray();
     }
     public static string[,] GetSQLiteSongsData(SQLiteConnection connection)
     {

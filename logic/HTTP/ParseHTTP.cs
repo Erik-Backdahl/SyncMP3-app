@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 class ParseHTTP
 {
-    public static string baseAddress = "http://155.4.190.87 :4221";
+    public static string baseAddress = "http://155.4.190.87:4221";
     public static HttpRequestMessage HTTPRequestFormat(string requestType, string path)
     {
         HttpMethod HttpType;

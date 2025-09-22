@@ -13,6 +13,7 @@ class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        Console.WriteLine("Hello World");
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 

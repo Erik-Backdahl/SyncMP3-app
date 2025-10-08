@@ -6,9 +6,9 @@
         xmlns:converters="clr-namespace:AvaloniaTest.Converters"
         mc:Ignorable="d" d:DesignWidth="950" d:DesignHeight="750"
         Width="950" Height="750"
-        x:Class="AvaloniaTest.MainWindow"
+        x:Class="SyncMP3App.MainWindow"
         x:DataType="local:MainWindowViewModel"
-        Title="AvaloniaTest">
+        Title="SyncMP3App">
     
     <Window.Resources>
         <converters:AlternatingRowColorConverter x:Key="AlternatingRowColorConverter"/>

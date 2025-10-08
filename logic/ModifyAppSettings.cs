@@ -7,15 +7,50 @@ using System.Security.Principal;
 using DynamicData;
 using System.Text.Json.Nodes;
 using System.Linq;
+using System.Reflection;
 
 class ModifyAppSettings
 {
-    private static readonly string jsonFilePath = Path.GetFullPath(
-    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Data\AppSettings.json")
-);
+    public static readonly string PathToDataFolder = GetPathToFolder();
+
+
+    public static readonly string PathToAppSetting = Path.Combine(PathToDataFolder, "AppSettings.json");
+    public static readonly string PathToSQLData = Path.Combine(PathToDataFolder, "DeviceMusicData.db");
+    public static readonly string PathToMessages = Path.Combine(PathToDataFolder, "Messages.json");
+    private static string GetPathToFolder()
+    {
+        string exeDirectory = AppContext.BaseDirectory;
+
+        if (exeDirectory.ToLower().Contains("debug"))
+        {
+            // Go up 3 directories
+            DirectoryInfo dir = new DirectoryInfo(exeDirectory);
+            for (int i = 0; i < 3; i++)
+            {
+                if (dir.Parent != null)
+                {
+                    dir = dir.Parent;
+                }
+                else
+                {
+                    throw new Exception("cannot find path to Data folder. if you are getting this exception try putting the executible in another subdirectory");
+                }
+            }
+
+            Console.WriteLine("Moved up 3 folders. New path:");
+            Console.WriteLine(dir.FullName);
+            return Path.Combine(dir.FullName, "Data");
+        }
+        else
+        {
+            Console.WriteLine("Not running from Debug directory. Current path:");
+            Console.WriteLine(exeDirectory);
+            return Path.Combine(exeDirectory, "Data");
+        }
+    }
     public static string ReadDownloadFolder()
     {
-        string jsonData = File.ReadAllText(jsonFilePath);
+        string jsonData = File.ReadAllText(PathToAppSetting);
 
         JsonFormat? settings = JsonSerializer.Deserialize<JsonFormat>(jsonData);
 
@@ -27,20 +62,20 @@ class ModifyAppSettings
     public static string[] ReadRegisteredMusicFolders()
     {
         // Read the JSON file content
-        string jsonData = File.ReadAllText(jsonFilePath);
+        string jsonData = File.ReadAllText(PathToAppSetting);
 
         // Deserialize into JsonFormat object
         JsonFormat? settings = JsonSerializer.Deserialize<JsonFormat>(jsonData);
 
-        if (settings != null && settings.RegisteredFolders != null)
+        if (settings != null && settings.RegisteredFolders != null && settings.RegisteredFolders.Length > 0)
             return settings.RegisteredFolders;
         else
-            throw new Exception("No Folders Registered to search");
+            throw new Exception("No Folders Registered to search, please click the \"Folder\" button");
     }
     public static void AddRegisteredFolder(string unEscapedFolder)
     {
         string folder = unEscapedFolder.Replace("/", "\\");
-        string jsonData = File.ReadAllText(jsonFilePath);
+        string jsonData = File.ReadAllText(PathToAppSetting);
 
         JsonFormat? root = JsonSerializer.Deserialize<JsonFormat>(jsonData);
 
@@ -65,11 +100,11 @@ class ModifyAppSettings
         }
 
         string updatedJson = JsonSerializer.Serialize(root);
-        File.WriteAllText(jsonFilePath, updatedJson);
+        File.WriteAllText(PathToAppSetting, updatedJson);
     }
     public static void AddDownloadFolder(string folder)
     {
-        string jsonData = File.ReadAllText(jsonFilePath);
+        string jsonData = File.ReadAllText(PathToAppSetting);
 
         JsonFormat? root = JsonSerializer.Deserialize<JsonFormat>(jsonData);
 
@@ -79,11 +114,11 @@ class ModifyAppSettings
         root.DownloadFolder = folder;
 
         string updatedJson = JsonSerializer.Serialize(root);
-        File.WriteAllText(jsonFilePath, updatedJson);
+        File.WriteAllText(PathToAppSetting, updatedJson);
     }
     public static string GetUUID()
     {
-        string jsonData = File.ReadAllText(jsonFilePath);
+        string jsonData = File.ReadAllText(PathToAppSetting);
 
         JsonFormat? root = JsonSerializer.Deserialize<JsonFormat>(jsonData);
         if (root != null)
@@ -95,7 +130,7 @@ class ModifyAppSettings
 
                 // Serialize back to JSON if needed
                 string updatedJson = JsonSerializer.Serialize(root);
-                File.WriteAllText(jsonFilePath, updatedJson);
+                File.WriteAllText(PathToAppSetting, updatedJson);
                 return root.UUID;
             }
             else
@@ -106,7 +141,7 @@ class ModifyAppSettings
     }
     public static string GetGUID()
     {
-        string jsonData = File.ReadAllText(jsonFilePath);
+        string jsonData = File.ReadAllText(PathToAppSetting);
 
         JsonFormat? root = JsonSerializer.Deserialize<JsonFormat>(jsonData);
         if (root != null)
@@ -118,7 +153,7 @@ class ModifyAppSettings
     }
     internal static void RegisterGUID(string GUID)
     {
-        string jsonData = File.ReadAllText(jsonFilePath);
+        string jsonData = File.ReadAllText(PathToAppSetting);
 
         JsonFormat? root = JsonSerializer.Deserialize<JsonFormat>(jsonData);
 
@@ -128,7 +163,7 @@ class ModifyAppSettings
             {
                 root.GUID = GUID;
                 string updatedJson = JsonSerializer.Serialize(root);
-                File.WriteAllText(jsonFilePath, updatedJson);
+                File.WriteAllText(PathToAppSetting, updatedJson);
             }
             else
             {

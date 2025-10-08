@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using DynamicData.Kernel;
 using TagLib.Id3v2;
 using System.Net;
+using AvaloniaTest;
 
-namespace AvaloniaTest
+namespace SyncMP3App
 {
     public partial class MainWindow : Window
     {

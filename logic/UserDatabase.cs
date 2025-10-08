@@ -163,7 +163,7 @@ class UserDatabase
         var cmd = new SQLiteCommand($"INSERT INTO allMusic(songID, name, absolutepath, uploadfile) VALUES (@songID, @songName, @absolutepath, @uploadfile)", connection);
 
         cmd.Parameters.AddWithValue("@songID", songID);
-        cmd.Parameters.AddWithValue("@songName", songName);
+        cmd.Parameters.AddWithValue("@songName", Path.GetFileName(songName));
         cmd.Parameters.AddWithValue("@absolutepath", folderName);
         cmd.Parameters.AddWithValue("@uploadfile", uploadFile);
 
@@ -264,7 +264,7 @@ class UserDatabase
     }
     public static SQLiteConnection OpenSQLiteConnection()
     {
-        string databasePath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Data\DeviceMusicData.db"));
+        string databasePath = ModifyAppSettings.PathToSQLData;
 
         if (!File.Exists(databasePath))
         {

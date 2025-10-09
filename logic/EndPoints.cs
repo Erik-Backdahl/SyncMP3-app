@@ -98,8 +98,9 @@ class EndPoints
             return (false, "Error" + ex.Message);
         }
     }
-    public static async Task<string> SendMusicToServer(string[] requestedMusicIDs)
+    public static async Task<string> SendMusicToServer(List<string> requestedMusicIDsList)
     {
+        string[] requestedMusicIDs = requestedMusicIDsList.ToArray();
         try
         {
             var connection = UserDatabase.OpenSQLiteConnection();
@@ -164,7 +165,7 @@ class EndPoints
         {
             Console.WriteLine(ex.Message);
         }
-        return "";
+        throw new NotImplementedException();
     }
 
     internal static async Task<(string? message, string? code)> RequestNewPassKey()
@@ -216,7 +217,7 @@ class EndPoints
             return message;
         }
     }
-    public static async Task<string> TrySendPing()
+    public static async Task<(string, Dictionary<string, string>?)> TrySendPing()
     {
         var client = new HttpClient();
         var request = ParseHTTP.HTTPRequestFormat("GET", "/ping");
@@ -234,26 +235,23 @@ class EndPoints
                 if (headers.Count > 0)
                 {
                     fullMessage += headers.Count + "Message(s) ";
-                    foreach (KeyValuePair<string, string> header in headers)
-                    {
-                        fullMessage += header + ";\n";
-                    }
-                    return fullMessage;
+                    
+                    return (fullMessage, headers);
                 }
                 else
                 {
-                    return fullMessage + "No Messages ";
+                    return (fullMessage + "No Messages ", headers);
                 }
             }
             else
             {
-                return "ping failed";
+                return ("ping failed", null);
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            return "ping failed";
+            return ("ping failed", null);
         }
 
     }

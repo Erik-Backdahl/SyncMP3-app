@@ -7,6 +7,7 @@ using DynamicData.Kernel;
 using TagLib.Id3v2;
 using System.Net;
 using AvaloniaTest;
+using System.Collections.Generic;
 
 namespace SyncMP3App
 {
@@ -221,10 +222,33 @@ namespace SyncMP3App
             {
                 DisableOtherButtons();
 
-                string connectionResult = await EndPoints.TrySendPing();
+                var (connectionResult, pingHeaders) = await EndPoints.TrySendPing();
+
 
                 if (connectionResult.StartsWith("connected"))
                 {
+                    if (pingHeaders != null)
+                    {
+                        List<string> textMessages = [];
+                        List<string> requestedSongsUUID = [];
+                        foreach (var serverMessage in pingHeaders)
+                        {
+                            string[] splitMessage = serverMessage.Value.ToString().Split(" ");
+
+                            string messageType = splitMessage[0];
+                            if (messageType == "uploadRequest")
+                            {
+                                requestedSongsUUID.Add(splitMessage[1]);
+                            }
+                            else // i can use else here because the message type can only be uploadRequest and message
+                            {//this is made sure on the server
+                                textMessages.Add(splitMessage[1]);
+                            }
+                        }
+                        if (requestedSongsUUID.Count > 0)
+                            await EndPoints.SendMusicToServer(requestedSongsUUID);
+                    }
+
                     var (headers, message) = await EndPoints.SendSQLToServer();
 
                     int successfulDownloads = 0;
@@ -236,23 +260,23 @@ namespace SyncMP3App
                         if (ammountNewSongs > 0)
                             message += $"\t {ammountNewSongs} Songs requested from server";
                         for (int i = 1; i < ammountNewSongs + 1; i++)
+                        {
+                            headers.TryGetValue($"X-Song{i}", out string? songID);
+                            if (songID != null)
                             {
-                                headers.TryGetValue($"X-Song{i}", out string? songID);
-                                if (songID != null)
+                                var (succes, resultMessage) = await EndPoints.RequestAndReceiveMusic(songID);
+                                Console.WriteLine(resultMessage);
+                                if (succes)
                                 {
-                                    var (succes, resultMessage) = await EndPoints.RequestAndReceiveMusic(songID);
-                                    Console.WriteLine(resultMessage);
-                                    if (succes)
-                                    {
-                                        successfulDownloads++;
-                                    }
-                                    else
-                                    {
-                                        unSuccessfulDownloads++;
-                                    }
-
+                                    successfulDownloads++;
                                 }
+                                else
+                                {
+                                    unSuccessfulDownloads++;
+                                }
+
                             }
+                        }
                     }
                     if (successfulDownloads > 0)
                     {

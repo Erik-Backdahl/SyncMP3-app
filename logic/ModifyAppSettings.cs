@@ -90,28 +90,14 @@ class ModifyAppSettings
             }
         }
 
+        if (root.RegisteredFolders.Length == 0)
+        {//AddDownloadFolder here
+            root.DownloadFolder = folder;
+        }
         var list = root.RegisteredFolders.ToList();
         list.Add(folder);
         root.RegisteredFolders = list.ToArray();
 
-        if (root.RegisteredFolders.Length == 0)
-        {
-            AddDownloadFolder(folder);
-        }
-
-        string updatedJson = JsonSerializer.Serialize(root);
-        File.WriteAllText(PathToAppSetting, updatedJson);
-    }
-    public static void AddDownloadFolder(string folder)
-    {
-        string jsonData = File.ReadAllText(PathToAppSetting);
-
-        JsonFormat? root = JsonSerializer.Deserialize<JsonFormat>(jsonData);
-
-        if (root == null || root.DownloadFolder == null)
-            throw new Exception("AppSettings file Not Found");
-
-        root.DownloadFolder = folder;
 
         string updatedJson = JsonSerializer.Serialize(root);
         File.WriteAllText(PathToAppSetting, updatedJson);

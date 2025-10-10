@@ -57,7 +57,7 @@ class ModifyAppSettings
         if (settings != null && !string.IsNullOrEmpty(settings.DownloadFolder))
             return settings.DownloadFolder;
         else
-            return "Failed Download Folder not found";
+            throw new Exception("No download Folder registered");
     }
     public static string[] ReadRegisteredMusicFolders()
     {

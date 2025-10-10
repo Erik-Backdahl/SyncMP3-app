@@ -54,7 +54,7 @@ class ModifyAppSettings
 
         JsonFormat? settings = JsonSerializer.Deserialize<JsonFormat>(jsonData);
 
-        if (settings != null && settings.DownloadFolder != null)
+        if (settings != null && !string.IsNullOrEmpty(settings.DownloadFolder))
             return settings.DownloadFolder;
         else
             return "Failed Download Folder not found";

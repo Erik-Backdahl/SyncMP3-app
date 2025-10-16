@@ -20,6 +20,7 @@ class Program
         Console.WriteLine("Hello World");
         Console.WriteLine(Path.Combine(AppContext.BaseDirectory, "Data"));
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.
